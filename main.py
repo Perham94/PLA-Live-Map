@@ -15,9 +15,31 @@ natures = ["Hardy","Lonely","Brave","Adamant","Naughty",
 PLAYER_LOCATION_PTR = "[[[[[[main+42B2558]+88]+90]+1F0]+18]+80]+90"
 SPAWNER_PTR = "[[main+4267ee0]+330]"
 app = Flask(__name__)
-with open("config.json","r",encoding="utf-8") as config:
-    IP_ADDRESS = json.load(config)["IP"]
-reader = nxreader.NXReader(IP_ADDRESS)
+
+# with open("config.json","r",encoding="utf-8") as config:
+#     IP_ADDRESS = json.load(config)["IP"]
+#reader = nxreader.NXReader(IP_ADDRESS)
+reader = 0
+@app.route("/")
+def root():
+    """Display index.html at the root of the application"""
+
+    return render_template('index.html')
+
+@app.route('/', methods=['POST'])
+def my_form_post():
+
+    text = request.form['text']
+    print(text)
+    if text is None or text is "":
+        return render_template('index.html')
+    else:
+        processed_text = text.upper()
+        request.form
+        global reader
+        reader = nxreader.NXReader(text)
+
+        return render_template('startup.html')
 
 def generate_from_seed(seed,rolls,guaranteed_ivs):
     """Generate pokemon information from a fixed seed (FixInitSpec)"""
@@ -125,10 +147,7 @@ def update_positions():
                                   "seed":seed}
     return json.dumps(spawns)
 
-@app.route("/")
-def root():
-    """Display index.html at the root of the application"""
-    return render_template('index.html')
+
 
 @app.route("/map/<name>")
 def load_map(name):
@@ -136,6 +155,7 @@ def load_map(name):
     url = "https://raw.githubusercontent.com/Lincoln-LM/JS-Finder/main/Resources/" \
          f"pla_spawners/jsons/{name}.json"
     markers = json.loads(requests.get(url).text)
+    print(reader)
     return render_template('map.html',markers=markers.values(),map_name=name)
 
 if __name__ == '__main__':
